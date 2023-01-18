@@ -1,14 +1,18 @@
 using System.Collections.Generic;
 using Tank3DMultiplayer.Support;
-using UnityEngine;
 using Newtonsoft.Json.Linq;
-
+using UnityEngine;
 
 namespace Tank3DMultiplayer.Data
 {
     public class DataTanks : SingletonPersistent<DataTanks>
     {
         private List<TankData> listDataTanks = new List<TankData>();
+        
+        [SerializeField]
+        private List<TankDataLocal> listDataTanksLocal = new List<TankDataLocal>();
+
+        public List<TankData> ListDataTanks { get { return listDataTanks; } }
 
         public bool ParseData(string dataTanks)
         {
@@ -23,7 +27,6 @@ namespace Tank3DMultiplayer.Data
 
                 string type = jObject["Type"].ToString();
                 string name = jObject["Name"].ToString();
-                string image = jObject["Image"].ToString();
                 float speed = (float)jObject["Speed"];
                 float speedRotate = (float)jObject["SpeedRotate"];
                 float maxHealth = (float)jObject["MaxHealth"];
@@ -34,13 +37,23 @@ namespace Tank3DMultiplayer.Data
                 float penetrateArmor = (float)jObject["PenetraterArmor"];
                 float armor = (float)jObject["Armor"];
 
-                TankData tankData = new TankData(type, name, image, speed, speedRotate, maxHealth, damagePerShoot
+                TankData tankData = new TankData(type, name, speed, speedRotate, maxHealth, damagePerShoot
                                         , shootingRange, timeBetweenTwoShoot, bulletSpeed, penetrateArmor, armor);
 
                 listDataTanks.Add(tankData);
             }
 
             return true;
+        }
+
+        public Sprite GetAvatarOfTank(TankType tankType)
+        {
+            int index = listDataTanksLocal.FindIndex((item) => item.TankType == tankType);
+
+            if(index == -1)
+                return null;
+
+            return listDataTanksLocal[index].TankAvatar;
         }
     }
 }

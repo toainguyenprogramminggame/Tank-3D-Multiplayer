@@ -38,7 +38,7 @@ namespace Tank3DMultiplayer.SceneManage.Bootstrap
             var handler = req.SendWebRequest();
 
             float startTime = 0.0f;
-            while (!handler.isDone || startTime < 3f || checkPoint<100)
+            while (!handler.isDone || startTime < 3f)
             {
                 startTime += Time.deltaTime;
                 if (progressLoading < checkPoint)

@@ -11,46 +11,16 @@ namespace Tank3DMultiplayer
         CharacterSelection,
         GamePlay,
         Summary
-
-
-        // Add more scenes states if needed
     };
-
-    public enum MenuName
-    {
-        MainMenu,
-        SelectGameModeMenu
-    }
-
-
-    public enum GameMode
-    {
-        SoloWithFriend,
-        SoloQuickMatch,
-        TeamWithFriend,
-        TeamQuickMatch
-    }
-
-
-    // States the player can have on the game
-    public enum ConnectionState : byte
-    {
-        connected,
-        disconnected,
-        ready
-    }
 
     public enum TankType
     {
         Null,
         Hulk,
         Gundam,
-    }
-
-    public enum ButtonActions : byte
-    {
-        lobby_ready,
-        lobby_not_ready,
+        DarkKnight,
+        Transformer,
+        IronMan
     }
 }
 

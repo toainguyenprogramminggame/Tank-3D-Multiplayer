@@ -6,7 +6,6 @@ namespace Tank3DMultiplayer.Data
     {
         private TankType tankType;
         private string name;
-        private string image;
         private float speed;
         private float speedRotate;
         private float maxHealth;
@@ -17,11 +16,10 @@ namespace Tank3DMultiplayer.Data
         private float pernetrateArmor;
         private float armor;
 
-        public TankData(string tankType, string name, string image, float speed, float speedRotate, float maxHealth, float damagePerShoot, float shootingRange, float timeBetweenTwoShoot, float bulletSpeed, float pernetrateArmor, float armor)
+        public TankData(string tankType, string name, float speed, float speedRotate, float maxHealth, float damagePerShoot, float shootingRange, float timeBetweenTwoShoot, float bulletSpeed, float pernetrateArmor, float armor)
         {
             Enum.TryParse<TankType>(tankType, out this.tankType);
             this.name = name;
-            this.image = image;
             this.speed = speed;
             this.speedRotate = speedRotate;
             this.maxHealth = maxHealth;
@@ -35,7 +33,6 @@ namespace Tank3DMultiplayer.Data
 
         public TankType TankType { get => tankType; set => tankType = value; }
         public string Name { get => name; set => name = value; }
-        public string Image { get => image; set => image = value; }
         public float Speed { get => speed; set => speed = value; }
         public float SpeedRotate { get => speedRotate; set => speedRotate = value; }
         public float MaxHealth { get => maxHealth; set => maxHealth = value; }

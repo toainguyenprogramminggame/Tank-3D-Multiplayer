@@ -693,6 +693,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4ccd967f3aa7b24d998b64d959fbdea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  listDataTanksLocal:
+  - {fileID: 11400000, guid: a1fadc62180d5a34d85a2e3b37b4af11, type: 2}
+  - {fileID: 11400000, guid: 51c379eefd8dc9a4f8f4eeabf2ec6146, type: 2}
+  - {fileID: 11400000, guid: 4fa0f6fb139c96940aaed8e45070d61e, type: 2}
+  - {fileID: 11400000, guid: 0729cc47aba99554fa4b6f21897ad272, type: 2}
+  - {fileID: 11400000, guid: 0698f907651c8f44a8b8469aa8f4b35e, type: 2}
 --- !u!1 &950728564
 GameObject:
   m_ObjectHideFlags: 0

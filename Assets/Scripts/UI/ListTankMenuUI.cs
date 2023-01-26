@@ -2,11 +2,11 @@ using System.Collections;
 using UnityEngine;
 using Tank3DMultiplayer.Data;
 using UnityEngine.UI;
-
+using Tank3DMultiplayer.UI;
 
 namespace Tank3DMultiplayer.SceneManage.Lobby
 {
-    public class LobbyManager : MonoBehaviour
+    public class ListTankMenuUI : UIPanelBase
     {
         [SerializeField]
         private GameObject itemTank;
@@ -14,8 +14,15 @@ namespace Tank3DMultiplayer.SceneManage.Lobby
         [SerializeField]
         private Transform listTanks;
 
+        public Button m_ButtonBackToMain;
+
         private void Start()
         {
+            m_ButtonBackToMain.onClick.AddListener(delegate
+            {
+                MenuManager.Instance.OpenMenu(MenuName.MainMenu);
+            });
+
             StartCoroutine(CreateListTanks());
         }
         IEnumerator CreateListTanks()

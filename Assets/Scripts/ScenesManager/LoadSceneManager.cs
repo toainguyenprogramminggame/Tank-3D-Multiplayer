@@ -23,7 +23,7 @@ namespace Tank3DMultiplayer.SceneManage
         }
 
 
-        public void LoadScene(SceneName sceneToLoad, bool isNetworkSessionActive = true)
+        public void LoadScene(SceneName sceneToLoad, bool isNetworkSessionActive = false)
         {
             StartCoroutine(Loading(sceneToLoad, isNetworkSessionActive));
         }

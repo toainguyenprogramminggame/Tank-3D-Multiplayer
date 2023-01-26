@@ -4,8 +4,7 @@ namespace Tank3DMultiplayer.UI
 {
     public class Menu : MonoBehaviour
     {
-        public string menuName;
-
+        public MenuName menuName;
 
         public void Close()
         {

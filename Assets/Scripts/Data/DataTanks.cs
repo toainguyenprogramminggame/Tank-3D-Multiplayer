@@ -8,11 +8,11 @@ namespace Tank3DMultiplayer.Data
     public class DataTanks : SingletonPersistent<DataTanks>
     {
         private List<TankData> listDataTanks = new List<TankData>();
-        
         [SerializeField]
         private List<TankDataLocal> listDataTanksLocal = new List<TankDataLocal>();
 
         public List<TankData> ListDataTanks { get { return listDataTanks; } }
+        public List<TankDataLocal> ListDataTanksLocal { get => listDataTanksLocal; }
 
         public bool ParseData(string dataTanks)
         {

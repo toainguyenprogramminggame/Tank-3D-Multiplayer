@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using Tank3DMultiplayer.Network.LobbyManager;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies.Models;
@@ -18,6 +20,7 @@ namespace Tank3DMultiplayer.UI
         [SerializeField] private Button buttonReady;
         [SerializeField] private Button buttonNotReady;
 
+
         private void Start()
         {
             leaveLobbyButton.onClick.AddListener(() =>
@@ -25,18 +28,18 @@ namespace Tank3DMultiplayer.UI
                 Manager.LeaveLobby();
             });
 
-            buttonReady.onClick.AddListener(() =>
+            buttonReady.onClick.AddListener(async () =>
             {
-                Manager.UpdatePlayerReady(ConstValue.KEY_VALUE_IS_READY);
+                await Manager.UpdatePlayerReadyAsync(ConstValue.KEY_VALUE_IS_READY);
                 buttonReady.gameObject.SetActive(false);
                 buttonNotReady.gameObject.SetActive(true);
                 buttonNotReady.GetComponent<Button>().interactable = false;
                 StartCoroutine(EnableButtonInteractionAfterSeconds(buttonNotReady.GetComponent<Button>()));
             });
 
-            buttonNotReady.onClick.AddListener(() =>
+            buttonNotReady.onClick.AddListener(async () =>
             {
-                Manager.UpdatePlayerReady(ConstValue.KEY_VALUE_NOT_READY);
+                await Manager.UpdatePlayerReadyAsync(ConstValue.KEY_VALUE_NOT_READY);
                 buttonNotReady.gameObject.SetActive(false);
                 buttonReady.gameObject.SetActive(true);
                 buttonReady.GetComponent<Button>().interactable = false;
@@ -81,9 +84,18 @@ namespace Tank3DMultiplayer.UI
 
         private void ClearLobbyUI()
         {
+            if (containListPlayers == null)
+                return;
             foreach (Transform child in containListPlayers)
             {
-                Destroy(child.gameObject);
+                try
+                {
+                    Destroy(child.gameObject);
+                }
+                catch(Exception e)
+                {
+                    Debug.LogException(e);
+                }
             }
         }
 

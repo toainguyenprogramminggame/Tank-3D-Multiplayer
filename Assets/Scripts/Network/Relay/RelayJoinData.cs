@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 
-
 namespace Tank3DMultiplayer.Network.RelayManager
 {
     public class RelayJoinData : MonoBehaviour

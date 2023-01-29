@@ -1,6 +1,6 @@
-
 using System;
 using System.Collections;
+using Tank3DMultiplayer.Manager;
 using Tank3DMultiplayer.Support;
 using Unity.Netcode;
 using UnityEngine;
@@ -13,17 +13,22 @@ namespace Tank3DMultiplayer.SceneManage
         public SceneName SceneActive => m_sceneActive;
         private SceneName m_sceneActive;
 
+        private IEnumerator Start()
+        {
+            yield return new WaitUntil(() => NetworkManager.Singleton.SceneManager != null);
+            Init();
+        }
 
         // After running the menu scene, which initiates this manager, we subscribe to these events
         // due to the fact that when a network session ends it cannot longer listen to them.
         public void Init()
         {
-            //NetworkManager.Singleton.SceneManager.OnLoadComplete -= OnLoadComplete;
-            //NetworkManager.Singleton.SceneManager.OnLoadComplete += OnLoadComplete;
+            NetworkManager.Singleton.SceneManager.OnLoadComplete -= OnLoadComplete;
+            NetworkManager.Singleton.SceneManager.OnLoadComplete += OnLoadComplete;
         }
 
 
-        public void LoadScene(SceneName sceneToLoad, bool isNetworkSessionActive = false)
+        public void LoadScene(SceneName sceneToLoad, bool isNetworkSessionActive = true)
         {
             StartCoroutine(Loading(sceneToLoad, isNetworkSessionActive));
         }
@@ -69,42 +74,27 @@ namespace Tank3DMultiplayer.SceneManage
             NetworkManager.Singleton.SceneManager.LoadScene(sceneToLoad.ToString(), LoadSceneMode.Single);
         }
 
-        //// This callback function gets triggered when a scene is finished loading
-        //// Here we set up what to do for each scene, like changing the music
-        //private void OnLoadComplete(ulong clientId, string sceneName, LoadSceneMode loadSceneMode)
-        //{
-        //    if (!NetworkManager.Singleton.IsServer)
-        //        return;
+        // This callback function gets triggered when a scene is finished loading
+        // Here we set up what to do for each scene, like changing the music
+        private void OnLoadComplete(ulong clientId, string sceneName, LoadSceneMode loadSceneMode)
+        {
+            if (!NetworkManager.Singleton.IsServer)
+                return;
 
-        //    Enum.TryParse(sceneName, out m_sceneActive);
+            Enum.TryParse(sceneName, out m_sceneActive);
 
-        //    if (m_sceneActive == SceneName.Room)
-        //    {
-        //        //if (!RoomManager.Instance.CanClientConnect(clientId))
-        //        //    return;
-        //    }
-
-        //    // What to initially do on every scene when it finishes loading
-        //    switch (m_sceneActive)
-        //    {
-        //        // When a client/host connects tell the manager
-        //        case SceneName.Room:
-        //            RoomManager.Instance.OnJoinedRoom(clientId);
-        //            break;
-
-        //        case SceneName.CharacterSelection:
-        //            // Do Something
-        //            break;
-
-        //        case SceneName.GamePlay:
-        //            GamePlayManager.Instance.InitGameplayScene(clientId);
-        //            break;
-
-        //        default:
-        //            break;
-
-        //    }
-        //}
+            switch (m_sceneActive)
+            {
+                case SceneName.CharacterSelection:
+                    GameManager.Instance.OnPlayerJoinedGame(clientId);
+                    break;
+                case SceneName.GamePlay:
+                    GameManager.Instance.OnGamePlayLoaded();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
 

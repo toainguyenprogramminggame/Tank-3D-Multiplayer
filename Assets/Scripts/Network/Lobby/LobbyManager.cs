@@ -6,6 +6,8 @@ using Unity.Services.Lobbies;
 using UnityEngine;
 using Tank3DMultiplayer.Support;
 using System.Collections.Generic;
+using Unity.Services.Relay;
+using UnityEngine.SceneManagement;
 
 namespace Tank3DMultiplayer.Network.LobbyManager
 {
@@ -16,14 +18,13 @@ namespace Tank3DMultiplayer.Network.LobbyManager
         Lobby m_CurrentLobby = null;
 
         public event EventHandler OnLeftLobby;
-
         public event EventHandler<LobbyEventArgs> OnJoinedLobby;
         public event EventHandler<LobbyEventArgs> OnJoinedLobbyUpdate;
         public event EventHandler<LobbyEventArgs> OnKickedFromLobby;
 
-
         private float lobbyPollTimer;
         private float lobbyHeartBeatTimer;
+
 
         public class LobbyEventArgs : EventArgs
         {
@@ -37,12 +38,14 @@ namespace Tank3DMultiplayer.Network.LobbyManager
 
         private void Update()
         {
-            if (m_CurrentLobby == null)
-                return;
             HandleLobbyPolling();
         }
         private async void HandleLobbyPolling()
         {
+            if(SceneManager.GetActiveScene().name != SceneName.Lobby.ToString())
+            {
+                return;
+            }
             if (m_CurrentLobby != null)
             {
                 lobbyPollTimer -= Time.deltaTime;
@@ -81,12 +84,18 @@ namespace Tank3DMultiplayer.Network.LobbyManager
             CreateLobbyOptions options = new CreateLobbyOptions
             {
                 Player = player,
-                IsPrivate = isPrivate
+                IsPrivate = isPrivate,
+                Data = new Dictionary<string, DataObject>
+                {
+                    {ConstValue.KEY_RELAY_JOIN_CODE, new DataObject( DataObject.VisibilityOptions.Member, "" )}
+                }
             };
             try
             {
                 m_CurrentLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, options);
                 OnJoinedLobby?.Invoke(this, new LobbyEventArgs { lobby = m_CurrentLobby });
+
+                StartHeartBeat();
                 return m_CurrentLobby;
             }
             catch (Exception ex)
@@ -95,7 +104,34 @@ namespace Tank3DMultiplayer.Network.LobbyManager
                 return null;
             }
         }
-        
+
+        /// <summary>
+        /// HEART BEAT
+        /// </summary>
+        #region HEARTBEAT
+        Task m_HeartBeatTask;
+        void StartHeartBeat()
+        {
+#pragma warning disable 4014
+            m_HeartBeatTask = HeartBeatLoop();
+#pragma warning restore 4014
+        }
+        async Task HeartBeatLoop()
+        {
+            while (m_CurrentLobby != null)
+            {
+                await SendHeartbeatPingAsync();
+                await Task.Delay((int)ConstValue.LOBBY_HEART_BEAT_TIMER * 1000);
+            }
+        }
+        async Task SendHeartbeatPingAsync()
+        {
+            if (!InLobby())
+                return;
+            await LobbyService.Instance.SendHeartbeatPingAsync(m_CurrentLobby.Id);
+        }
+        #endregion
+
         public async Task<Lobby> JoinLobbyByCodeAsync(string lobbyCode)
         {
             Player player = GetPlayerInformation();
@@ -118,7 +154,7 @@ namespace Tank3DMultiplayer.Network.LobbyManager
             return m_CurrentLobby;
         }
 
-        public async void QuickJoinLobby()
+        public async Task<Lobby> QuickJoinLobby()
         {
             try
             {
@@ -128,11 +164,13 @@ namespace Tank3DMultiplayer.Network.LobbyManager
                 m_CurrentLobby = lobby;
 
                 OnJoinedLobby?.Invoke(this, new LobbyEventArgs { lobby = lobby });
+                return m_CurrentLobby;
             }
             catch (LobbyServiceException e)
             {
                 Debug.Log(e);
             }
+            return null;
         }
 
         public async void LeaveLobbyAsync()
@@ -144,7 +182,6 @@ namespace Tank3DMultiplayer.Network.LobbyManager
                 string playerId = AuthenticationService.Instance.PlayerId;
 
                 await LobbyService.Instance.RemovePlayerAsync(m_CurrentLobby.Id, playerId);
-                Debug.Log("Leave");
                 m_CurrentLobby = null;
 
                 OnLeftLobby?.Invoke(this, EventArgs.Empty);
@@ -213,7 +250,7 @@ namespace Tank3DMultiplayer.Network.LobbyManager
             return false;
         }
 
-        public async void UpdatePlayerReady(string isReady)
+        public async Task<Lobby> UpdatePlayerReady(string isReady)
         {
             if (m_CurrentLobby != null)
             {
@@ -241,12 +278,42 @@ namespace Tank3DMultiplayer.Network.LobbyManager
                     m_CurrentLobby = lobby;
 
                     OnJoinedLobbyUpdate?.Invoke(this, new LobbyEventArgs { lobby = m_CurrentLobby });
+                    return m_CurrentLobby;
                 }
                 catch (LobbyServiceException e)
                 {
                     Debug.Log(e);
                 }
             }
+            return null;
+        }
+
+        public async Task<Lobby> UpdateLobbyRelayJoinCode(string relayJoinCode)
+        {
+            if(m_CurrentLobby != null)
+            {
+                try
+                {
+                    Player player = GetPlayerInformation();
+                    Lobby lobby = await Lobbies.Instance.UpdateLobbyAsync(m_CurrentLobby.Id, new UpdateLobbyOptions
+                    {
+                        IsPrivate = CurrentLobby.IsPrivate,
+                        Data = new Dictionary<string, DataObject>
+                    {
+                        { ConstValue.KEY_RELAY_JOIN_CODE, new DataObject(DataObject.VisibilityOptions.Member, relayJoinCode) }
+                    }
+                    });
+
+                    m_CurrentLobby = lobby;
+                    return lobby;
+                }
+                catch (LobbyServiceException e)
+                {
+                    Debug.Log(e);
+                }
+            }
+            
+            return null;
         }
     }
 }

@@ -13,6 +13,7 @@ using Tank3DMultiplayer.Network.RelayManager;
 using Unity.Netcode;
 using Tank3DMultiplayer.SceneManage;
 using Unity.Services.Authentication;
+using System;
 
 namespace Tank3DMultiplayer.Manager
 {
@@ -31,7 +32,6 @@ namespace Tank3DMultiplayer.Manager
                 }
             };
         }
-
 
         private void Update()
         {
@@ -58,7 +58,6 @@ namespace Tank3DMultiplayer.Manager
 
                 string joinCode = LobbyManager.Instance.CurrentLobby.Data[ConstValue.KEY_RELAY_JOIN_CODE].Value;
                 await RelayManager.Instance.JoinRelay(joinCode);
-                Debug.Log(joinCode);
                 NetworkManager.Singleton.StartClient();
             }
         }
@@ -178,15 +177,17 @@ namespace Tank3DMultiplayer.Manager
             LoadSceneManager.Instance.LoadScene(SceneName.GamePlay);
         }
 
-        public void OnGamePlayLoaded()
+        public void OnGamePlayLoaded(ulong clientId)
         {
-            SpawnTanks();
+            if (!IsServer)
+                return;
+            SpawnTanks(clientId);
             InitPoolObject();
         }
 
-        public void SpawnTanks()
+        public void SpawnTanks(ulong clientId)
         {
-            StartCoroutine(SpawnManager.Instance.SpawnTanks());
+            StartCoroutine(SpawnManager.Instance.SpawnTanks(clientId));
         }
 
         public void InitPoolObject()
@@ -194,6 +195,20 @@ namespace Tank3DMultiplayer.Manager
             StartCoroutine( SpawnManager.Instance.SpawnObjectInGame());
         }
         #endregion
+
+
+        public string LoadPlayerName()
+        {
+            string name = PlayerPrefs.GetString(ConstValue.PREF_KEY_PLAYER_NAME, NameGenerator.GetName(AuthenticationService.Instance.PlayerId));
+            return name;
+        }
+
+        public ProfileAvatar LoadPlayerAvatar()
+        {
+            ProfileAvatar avatarType = ProfileAvatar.Hulk;
+            Enum.TryParse(PlayerPrefs.GetString(ConstValue.PREF_KEY_PLAYER_AVATAR, ProfileAvatar.Hulk.ToString()), out avatarType);
+            return avatarType;
+        }
     }
 }
 

@@ -1,15 +1,19 @@
 using UnityEngine;
 using Unity.Netcode;
 using Tank3DMultiplayer.Data;
+using System.Collections.Generic;
+using Tank3DMultiplayer;
 
 public class TankController : NetworkBehaviour
 {
     [Header("Scripts References")]
     public Movement playerMovement;
     public Shoot playerShoot;
+    public CameraFollow cameraFollow;
+    public Health health;
 
     ulong ownId { get; set; }
-    private bool HasAuthority => IsServer;
+    private bool HasAuthority => IsOwner;
 
     Vector3 move;
     bool blockMove = false;
@@ -19,13 +23,11 @@ public class TankController : NetworkBehaviour
     bool blockShoot = false;
 
     bool skill1, skill2, skill3;
-
-
     private void Update()
     {
         if (!HasAuthority)
             return;
-        playerMovement.MoveUpdate(move,blockMove);
+        playerMovement.MoveUpdate(move, blockMove);
         playerShoot.ShootUpdate(shoot, aim, autoShoot, blockShoot);
     }
 
@@ -34,6 +36,7 @@ public class TankController : NetworkBehaviour
     {
         this.move = move;
     }
+
 
     public void ShootUpdate(Vector3 aim, bool isShoot, bool autoShoot)
     {
@@ -49,11 +52,16 @@ public class TankController : NetworkBehaviour
         this.skill3 = skill3;
     }
 
-    public void SetupData(ulong clientId, TankData dataOfTank)
+    [ClientRpc]
+    public void SetupDataClientRpc(ulong clientId, TankType tankType)
     {
+        List<TankData> tanksData = DataTanks.Instance.ListDataTanks;
+        TankData dataOfCurTank = tanksData.Find(x => x.TankType == tankType);
+
         this.ownId = clientId;
-        playerMovement.SetupData(dataOfTank.Speed, dataOfTank.SpeedRotate);
-        playerShoot.SetupData(dataOfTank.TankType, dataOfTank.DamagePerShoot, dataOfTank.ShootingRange, dataOfTank.TimeBetweenTwoShoot, dataOfTank.BulletSpeed);
+        playerMovement.SetupData(dataOfCurTank.Speed, dataOfCurTank.SpeedRotate);
+        playerShoot.SetupData(dataOfCurTank.TankType, dataOfCurTank.DamagePerShoot, dataOfCurTank.ShootingRange, dataOfCurTank.TimeBetweenTwoShoot, dataOfCurTank.BulletSpeed);
+        health.SetupDataServerRpc(dataOfCurTank.MaxHealth);
     }
 
     // Use to block move and shoot of player
@@ -73,5 +81,4 @@ public class TankController : NetworkBehaviour
     {
         blockShoot = false;
     }
-
 }

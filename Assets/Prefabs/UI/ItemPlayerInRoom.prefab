@@ -378,6 +378,7 @@ MonoBehaviour:
   kickPlayerButton: {fileID: 1766111636}
   playerReadyText: {fileID: 1281505329}
   playerNameText: {fileID: 8084710806109926617}
+  playerAvatarImage: {fileID: 8084710806822637550}
 --- !u!114 &5850610981882653416
 MonoBehaviour:
   m_ObjectHideFlags: 0

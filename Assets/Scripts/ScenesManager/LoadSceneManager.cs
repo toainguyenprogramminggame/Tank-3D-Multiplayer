@@ -89,7 +89,7 @@ namespace Tank3DMultiplayer.SceneManage
                     GameManager.Instance.OnPlayerJoinedGame(clientId);
                     break;
                 case SceneName.GamePlay:
-                    GameManager.Instance.OnGamePlayLoaded();
+                    GameManager.Instance.OnGamePlayLoaded(clientId);
                     break;
                 default:
                     break;

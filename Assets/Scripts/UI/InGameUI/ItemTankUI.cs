@@ -2,6 +2,7 @@ using System;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine;
+using Tank3DMultiplayer.SceneManage.Lobby;
 
 namespace Tank3DMultiplayer.UI
 {
@@ -31,9 +32,11 @@ namespace Tank3DMultiplayer.UI
             switch(currentScene)
             {
                 case SceneName.Lobby:
+                    GetComponentInParent<ListTankMenuUI>().SelectTank(TankType);
                     break;
                 case SceneName.CharacterSelection:
                     Manager.SelectTank(TankType);
+                    (transform.root.GetComponentInChildren(typeof(PickTankUI), true) as PickTankUI).SelectMainTank(TankType);
                     break;
                 default:
                     break;

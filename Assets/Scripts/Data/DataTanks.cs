@@ -14,6 +14,21 @@ namespace Tank3DMultiplayer.Data
         public List<TankData> ListDataTanks { get { return listDataTanks; } }
         public List<TankDataLocal> ListDataTanksLocal { get => listDataTanksLocal; }
 
+        public TankData GetDataOfTank(TankType type)
+        {
+            int index = listDataTanks.FindIndex(x => x.TankType== type);
+            if (index == -1)
+                return null;
+            return listDataTanks[index];
+        }
+        public Sprite GetImageOfTank(TankType type)
+        {
+            int index = listDataTanksLocal.FindIndex(x => x.TankType == type);
+            if (index == -1)
+                return null;
+
+            return listDataTanksLocal[index].TankAvatar;
+        }
         public bool ParseData(string dataTanks)
         {
             string afterCut = dataTanks.ToString().Remove(dataTanks.Length - 1, 1).Remove(0, 1);
@@ -23,6 +38,7 @@ namespace Tank3DMultiplayer.Data
 
             foreach (string part in parts)
             {
+                Debug.Log(part);
                 JObject jObject = JObject.Parse(part);
 
                 string type = jObject["Type"].ToString();

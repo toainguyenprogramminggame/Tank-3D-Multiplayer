@@ -8,6 +8,7 @@ using Tank3DMultiplayer.Support;
 using System.Collections.Generic;
 using Unity.Services.Relay;
 using UnityEngine.SceneManagement;
+using Tank3DMultiplayer.Manager;
 
 namespace Tank3DMultiplayer.Network.LobbyManager
 {
@@ -156,9 +157,11 @@ namespace Tank3DMultiplayer.Network.LobbyManager
 
         public async Task<Lobby> QuickJoinLobby()
         {
+            Player player = GetPlayerInformation();
             try
             {
                 QuickJoinLobbyOptions options = new QuickJoinLobbyOptions();
+                options.Player = player;
 
                 Lobby lobby = await LobbyService.Instance.QuickJoinLobbyAsync(options);
                 m_CurrentLobby = lobby;
@@ -209,8 +212,9 @@ namespace Tank3DMultiplayer.Network.LobbyManager
             string playerId = AuthenticationService.Instance.PlayerId;
             return new Player(playerId, null, new Dictionary<string, PlayerDataObject>
             {
-                {ConstValue.KEY_PLAYER_NAME, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public,NameGenerator.GetName(playerId)) },
-                {ConstValue.KEY_PLAYER_READY, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, ConstValue.KEY_VALUE_NOT_READY)}
+                {ConstValue.KEY_PLAYER_NAME, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public,GameManager.Instance.LoadPlayerName())},
+                {ConstValue.KEY_PLAYER_READY, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, ConstValue.KEY_VALUE_NOT_READY)},
+                {ConstValue.KEY_PLAYER_AVATAR, new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, GameManager.Instance.LoadPlayerAvatar().ToString()) }
             });
         }
 

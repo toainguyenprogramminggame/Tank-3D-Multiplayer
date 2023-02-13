@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using Tank3DMultiplayer;
-using Tank3DMultiplayer.Network.LobbyManager;
 using Tank3DMultiplayer.UI;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies.Models;
@@ -13,6 +11,7 @@ public class ItemPlayerInRoomUI : UIPanelBase
     [SerializeField] Button kickPlayerButton;
     [SerializeField] Text playerReadyText;
     [SerializeField] Text playerNameText;
+    [SerializeField] Image playerAvatarImage;
 
     private Player player;
 
@@ -35,7 +34,13 @@ public class ItemPlayerInRoomUI : UIPanelBase
     {
         this.player = player;
         playerNameText.text = player.Data[ConstValue.KEY_PLAYER_NAME].Value;
-        
+
+        ProfileAvatar avatar;
+
+        Enum.TryParse(player.Data[ConstValue.KEY_PLAYER_AVATAR].Value, out avatar);
+        playerAvatarImage.sprite = ProfileAssets.Instance.GetAvatar(avatar);
+
+
         if(player.Id == AuthenticationService.Instance.PlayerId)
         {
             GetComponent<Outline>().enabled = true;

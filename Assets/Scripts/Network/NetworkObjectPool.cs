@@ -161,26 +161,27 @@ public class NetworkObjectPool : SingletonNetwork<NetworkObjectPool>
     {
         foreach (var configObject in BulletPrefabList)
         {
-            RegisterPrefabInternal(configObject.Prefab, configObject.PrewarmCount);
+            RegisterPrefabInternal(configObject.Prefab, ConstValue.PREWARM_COUNT_SPAWN);
         }
     }
 
     public void InitializedPool(List<PlayerInGameData> playersData)
     {
         // Spawn Bullet
-        foreach(var bullet in BulletPrefabList)
+        foreach(var player in playersData)
         {
-            TankType type = bullet.Type;
-            if (playersData.FindIndex(x => x.tankType == type) == -1)
+            TankType type = player.tankType;
+            int index = BulletPrefabList.FindIndex(x => x.Type == type);
+            if (index == -1)
                 continue;
+            RegisterPrefabInternal(BulletPrefabList[index].Prefab, ConstValue.PREWARM_COUNT_SPAWN);
 
-            RegisterPrefabInternal(bullet.Prefab, bullet.PrewarmCount);
         }
 
         // Spawn obligatory object
         foreach(var configObject in ObligatoryPrefabList)
         {
-            RegisterPrefabInternal(configObject.Prefab, configObject.PrewarmCount);
+            RegisterPrefabInternal(configObject.Prefab, ConstValue.PREWARM_COUNT_SPAWN);
         }
     }
 }
@@ -189,7 +190,6 @@ public class NetworkObjectPool : SingletonNetwork<NetworkObjectPool>
 struct PoolConfigObject
 {
     public GameObject Prefab;
-    public int PrewarmCount;
 }
 
 [Serializable]
@@ -197,7 +197,6 @@ struct PoolConfigObjectBullet
 {
     public TankType Type;
     public GameObject Prefab;
-    public int PrewarmCount;
 }
 
 class DummyPrefabInstanceHandler : INetworkPrefabInstanceHandler

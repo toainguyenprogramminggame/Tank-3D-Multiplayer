@@ -11,9 +11,6 @@ namespace Tank3DMultiplayer.SceneManage.Bootstrap
     public class LoadDataFromServer : Singleton<LoadDataFromServer>
     {
         [SerializeField]
-        private string dataEndpoint = "http://127.0.0.1:3000/data/tanks";
-
-        [SerializeField]
         private Slider progressLoadingSlider;
 
         private bool isCompleteLoaded = false;
@@ -34,7 +31,7 @@ namespace Tank3DMultiplayer.SceneManage.Bootstrap
 
         private IEnumerator TryGetTanksData()
         {
-            UnityWebRequest req = UnityWebRequest.Get(dataEndpoint);
+            UnityWebRequest req = UnityWebRequest.Get(ConstValue.LOAD_DATA_TANKS);
             var handler = req.SendWebRequest();
 
             float startTime = 0.0f;

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Tank3DMultiplayer.Network.RelayManager
 {
-    public class RelayHostData : MonoBehaviour
+    public class RelayHostData
     {
         public string JoinCode;
         public string IPv4Address;

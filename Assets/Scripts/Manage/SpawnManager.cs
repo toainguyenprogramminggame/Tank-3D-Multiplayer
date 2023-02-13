@@ -12,7 +12,27 @@ public class SpawnManager : SingletonNetwork<SpawnManager>
     [SerializeField]
     private List<Transform> positionSpawnTank = new List<Transform>();
 
-    public IEnumerator SpawnTanks()
+    bool[] checkPositionUsed;
+
+    private void Start()
+    {
+        checkPositionUsed = Enumerable.Repeat(false, positionSpawnTank.Count).ToArray();
+    }
+
+    private bool checkAllPositionSpawnedUsed()
+    {
+        foreach(var position in checkPositionUsed)
+        {
+            if (!position)
+                return false;
+        }
+        for (int i = 0; i < checkPositionUsed.Length; i++)
+        {
+            checkPositionUsed[i] = false;
+        }
+        return true;
+    }
+    public IEnumerator SpawnTanks(ulong clientId)
     {
         yield return new WaitUntil(() => DataTanks.Instance != null && PlayersManager.Instance != null);
 
@@ -22,44 +42,39 @@ public class SpawnManager : SingletonNetwork<SpawnManager>
             yield return null;
         }
         List<TankDataLocal> tanksDataLocal = DataTanks.Instance.ListDataTanksLocal;
-        List<TankData> tanksData = DataTanks.Instance.ListDataTanks;
-        List<PlayerInGameData> playersData = PlayersManager.Instance.PlayersData;
+        PlayerInGameData playerJoinScene = PlayersManager.Instance.GetPlayerData(clientId);
 
-        bool[] checkPositionUsed = Enumerable.Repeat(false, positionSpawnTank.Count).ToArray();
-
-        foreach(var player in playersData)
+        TankType tankType = playerJoinScene.tankType;
+        if (tankType == TankType.Null)
+            tankType = TankType.Hulk;
+        int index = tanksDataLocal.FindIndex(x => x.TankType == tankType);
+        if (index == -1)
         {
-            TankType tankType = player.tankType;
-
-            int index = tanksDataLocal.FindIndex(x => x.TankType == tankType);
-            if (index == -1)
-            {
-                Debug.LogError("PREFAB OF " + tankType.ToString() + " NOT EXISTS");
-                continue;
-            }
-
+            Debug.LogError("PREFAB OF " + tankType.ToString() + " NOT EXISTS");
+        }
+        else
+        {
             int indexPosition = 0;
             do
             {
                 indexPosition = Random.Range(0, positionSpawnTank.Count);
+                if (checkAllPositionSpawnedUsed())
+                    break;
             } while (checkPositionUsed[indexPosition]);
 
             checkPositionUsed[indexPosition] = true;
             Vector3 positionSpawn = positionSpawnTank[indexPosition].position;
 
             GameObject tankPrefab = tanksDataLocal[index].TankPrefab;
-            GameObject tank = NetworkObjectSpawner.SpawnNewNetworkObjectChangeOwnershipToClient(tankPrefab, positionSpawn, player.clientId);
+            GameObject tank = NetworkObjectSpawner.SpawnNewNetworkObjectChangeOwnershipToClient(tankPrefab, positionSpawn, playerJoinScene.clientId);
 
             // Setup data for tank on Server
-            TankData dataOfCurTank = tanksData.Find(x => x.TankType == player.tankType);
             TankController tankController = tank.GetComponent<TankController>();
             if (tankController != null)
             {
-                tankController.SetupData(player.clientId, dataOfCurTank);
+                tankController.SetupDataClientRpc(clientId, tankType);
             }
         }
-
-        yield return null;
     }
 
     public IEnumerator SpawnObjectInGame()

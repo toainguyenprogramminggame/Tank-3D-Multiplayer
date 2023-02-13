@@ -33,7 +33,7 @@ public class SelectTankManager : SingletonNetwork<SelectTankManager>
 
     private void StartGame()
     {
-        if(countDownTimeSelectTank.Value > 0)
+        if(countDownTimeSelectTank.Value > 0 || !IsServer)
             return;
         GameManager.Instance.StartGamePlay();
     }
